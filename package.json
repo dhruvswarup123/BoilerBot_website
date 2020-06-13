@@ -1,0 +1,31 @@
+{
+  "name": "boilerbot_website",
+  "version": "1.0.0",
+  "description": "Website for senior design project",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhruvswarup123/BoilerBot_website.git"
+  },
+  "keywords": [
+    "express",
+    "session",
+    "login",
+    "boilerbot",
+    "website"
+  ],
+  "author": "Dhruv Swarup",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dhruvswarup123/BoilerBot_website/issues"
+  },
+  "homepage": "https://github.com/dhruvswarup123/BoilerBot_website#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "nodemon": "^2.0.4"
+  }
+}
