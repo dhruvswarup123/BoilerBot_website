@@ -5,37 +5,18 @@
 
 const express = require("express")
 
+// Define express app
+const app = express()
+
 // Sessions can be stored server-side (ex: user auth) or client-side
 // (ex: shopping cart). express-session saves sessions in a store, and
 // NOT in a cookie. To store sessions in a cookie, use cookie-session.
 const session = require("express-session")
 
-// The default in-memory store is not production-ready because it leaks
-// memory and doesn't scale beyond once process. For production, we need
-// a session store, like Redis, which we can wire up with connect-redis.
-// const RedisStore = require('connect-redis')(session)
-
-// As of v4, connect-redis no longer ships with a default Redis client.
-// You can continue using the redis package or switch to ioredis which
-// has more features and better maintenance.
-// TODO: Find beginner friendly storage db
-//const Redis = require('ioredis')
-
-// Redis is a key-value NoSQL data store. It's perfect for sessions,
-// because they can be serialized to JSON and stored temporarily using
-// SETEX to auto-expire (i.e. auto-remove) after maxAge in seconds.
-//const client = new Redis({
-// host: 'localhost', // already the default
-// port: 6379, // already the default
-//password: 'secret'
-//})
-
-// const store = new RedisStore({ client })
+const MongoStore = require('connect-mongo')(session);
 
 const { PORT = 3000, NODE_ENV = "development", SESS_NAME='sid' } = process.env
 
-// Define express app
-const app = express()
 app.use(express.json()) //Used to parse JSON bodies
 app.use(express.urlencoded({ extended: true }))
 
@@ -44,7 +25,12 @@ app.use(
     session({
         // Defaults to MemoryStore, meaning sessions are stored as POJOs
         // in server memory, and are wiped out when the server restarts.
-        // store: 'MemoryStore',
+        store: new MongoStore({
+            url: "",
+            mongooseConnection: "",
+            client: "",
+            clientPromise: "",
+        }),
 
         // Name for the session ID cookie. Defaults to 'connect.sid'.
         name: SESS_NAME,
