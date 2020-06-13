@@ -14,6 +14,9 @@ const app = express()
 const session = require("express-session")
 
 const MongoStore = require('connect-mongo')(session);
+const { MongoClient } = require('mongodb');
+const MONGO_URI = "mongodb://localhost:27017/";
+const client = new MongoClient(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const { PORT = 3000, NODE_ENV = "development", SESS_NAME='sid' } = process.env
 
@@ -26,10 +29,8 @@ app.use(
         // Defaults to MemoryStore, meaning sessions are stored as POJOs
         // in server memory, and are wiped out when the server restarts.
         store: new MongoStore({
-            url: "",
-            mongooseConnection: "",
-            client: "",
-            clientPromise: "",
+            url: "mongodb://localhost:27017/boilerbot_web",
+            collection: "sessions_test"
         }),
 
         // Name for the session ID cookie. Defaults to 'connect.sid'.
@@ -104,15 +105,6 @@ app.use(
 
 
 // * --- Done Config --- 
-
-
-const users = [
-    {id: 1, name: 'Dhruv Swarup', email: 'dhruv@gmail.com', password: 'passd'},
-    {id: 2, name: 'rocky', email: 'rocky@gmail.com', password: 'passr'},
-    {id: 3, name: 'lee', email: 'lee@gmail.com', password: 'passl'},
-]
-
-
 const redirectLogin = (req, res, next) => {
     if (!req.session.userID){
         return res.redirect("/login")
@@ -130,15 +122,6 @@ const redirectHome = (req, res, next) => {
         next()
     }
 }
-
-
-app.use((req, res, next) => {
-    const { userID } = req.session
-    if (userID){
-        res.locals.user = users.find(user => user.id === userID)
-    }
-    next()
-})
 
 // * To get the main page
 app.get("/", (req, res) => {
@@ -213,20 +196,28 @@ app.get("/login", redirectHome, (req, res) => {
     `)
 })
 
+// db.insertOne({id: 3, name: 'lee', email: 'lee@gmail.com', password: 'passl'})
+
 // * Corresponing post route for login
 app.post("/login", redirectHome, (req, res) => {
     const { email, password } = req.body
     let user = null;
     if (email && password){
-        user = users.find(user => user.email === email && user.password === password) //TODO hash
-    }
+        //TODO hash
+        db.findOne({email: email, password: password}, (err, user) => {
+            if (user){
+                req.session.userID = user.id
+                return res.redirect("/home")
+            }
 
-    if (user){
-        req.session.userID = user.id
-        return res.redirect("/home")
-    }
+            return res.redirect("/login")
+        })
 
-    return res.redirect("/login")
+        // return res.redirect("/login")
+    }
+    else {
+        return res.redirect("/login")
+    }
 })
 
 
@@ -249,37 +240,32 @@ app.post("/register", redirectHome, (req, res) => {
     const { name, email, password } = req.body
 
     if (name && email && password){ //TODO validation better
-        const exists = users.some(user => user.email === email) 
-        if (!exists){
-            const user = {
-                id: users.length + 1,
-                name: name,
-                email: email,
-                password: password
+        db.findOne({email: email}, (err, user) => {
+            if (!user){
+                const user_ = {
+                    id: 5,
+                    name: name,
+                    email: email,
+                    password: password
+                }
+                
+                db.insertOne(user_);
+                req.session.userID = user_.id
+                return res.redirect("/home")
+            }
+            else {
+                return res.redirect("/register") //TODO: query string parameters error maybe
             }
 
-            users.push(user)
-
-            req.session.userID = user.id
-            return res.redirect("/home")
-        }
-
-        return res.redirect("/register") //TODO: query string parameters error maybe
+        })      
     }
-
-    if (user){
-        req.session.userID = user.id
-        return res.redirect("/home")
-    }
-
-    return res.redirect("/login")
 })
 
 
 // * Homepage after login
 app.get("/home", redirectLogin, (req, res) => {
-    const { user } = res.locals
-    res.send(`
+    db.findOne({id: req.session.userID}, (err, user) => {
+        res.send(`
         <h1>home after login</h1>
 
         <a href='/'>Go to Main</a>
@@ -287,7 +273,8 @@ app.get("/home", redirectLogin, (req, res) => {
             <li> Name: ${user.name}
             <li> Email:  ${user.email}
         </ul>
-    `)
+        `)
+    })
 })
 
 
@@ -308,6 +295,22 @@ app.post("/logout", redirectLogin, (req, res) => {
   })
 })
 
-app.listen(PORT, () =>
-  console.log(`Starting server on http://localhost:${PORT}...`)
-)
+var db = null;
+
+client.connect().then(()=>{
+    console.log("Connected to MongoDB users server!")
+    
+    // The database
+    db = client.db("boilerbot_web").collection("users")
+    // db.insertMany(users)
+    db.find().toArray(function(err, docs) {
+        for (i in docs){
+            console.log(docs[i].name)
+        }
+    });
+    app.listen(PORT, () =>
+        console.log(`Starting server on http://localhost:${PORT}...`)
+    )
+}).catch(err => console.log(err));
+
+
