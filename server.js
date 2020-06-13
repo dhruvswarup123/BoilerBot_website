@@ -129,7 +129,7 @@ const users = [
 
 const redirectLogin = (req, res, next) => {
     if (!req.session.userID){
-        res.redirect("/login")
+        return res.redirect("/login")
     }
     else {
         next()
@@ -138,13 +138,21 @@ const redirectLogin = (req, res, next) => {
 
 const redirectHome = (req, res, next) => {
     if (req.session.userID){
-        res.redirect("/home")
+        return res.redirect("/home")
     }
     else {
         next()
     }
 }
 
+
+app.use((req, res, next) => {
+    const { userID } = req.session
+    if (userID){
+        res.locals.user = users.find(user => user.id === userID)
+    }
+    next()
+})
 
 // * To get the main page
 app.get("/", (req, res) => {
@@ -222,17 +230,17 @@ app.get("/login", redirectHome, (req, res) => {
 // * Corresponing post route for login
 app.post("/login", redirectHome, (req, res) => {
     const { email, password } = req.body
-
+    let user = null;
     if (email && password){
-        const user = users.find(user => user.email === email && user.password === password) //TODO hash
+        user = users.find(user => user.email === email && user.password === password) //TODO hash
     }
 
     if (user){
         req.session.userID = user.id
-        res.redirect("/home")
+        return res.redirect("/home")
     }
 
-    res.redirect("/login")
+    return res.redirect("/login")
 })
 
 
@@ -267,30 +275,31 @@ app.post("/register", redirectHome, (req, res) => {
             users.push(user)
 
             req.session.userID = user.id
-            res.redirect("/home")
+            return res.redirect("/home")
         }
 
-        res.redirect("/register") //TODO: query string parameters error maybe
+        return res.redirect("/register") //TODO: query string parameters error maybe
     }
 
     if (user){
         req.session.userID = user.id
-        res.redirect("/home")
+        return res.redirect("/home")
     }
 
-    res.redirect("/login")
+    return res.redirect("/login")
 })
 
 
 // * Homepage after login
 app.get("/home", redirectLogin, (req, res) => {
+    const { user } = res.locals
     res.send(`
         <h1>home after login</h1>
 
         <a href='/'>Go to Main</a>
         <ul>
-            <li> Name: 
-            <li> Email:  
+            <li> Name: ${user.name}
+            <li> Email:  ${user.email}
         </ul>
     `)
 })
@@ -305,11 +314,11 @@ app.post("/logout", redirectLogin, (req, res) => {
     // session is already destroyed at this point, so either way, the
     // user won't be able to authenticate with that same cookie again.
     if (err){
-        res.redirect("/home")
+        return res.redirect("/home")
     }
 
     res.clearCookie(SESS_NAME)
-    res.redirect("/")
+    return res.redirect("/")
   })
 })
 
