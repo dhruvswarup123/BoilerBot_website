@@ -235,6 +235,22 @@ app.get("/register", redirectHome, (req, res) => {
     `)
 })
 
+
+async function getRandomID(){
+    rand = Math.round(Math.random() * 1000000)
+    while ((await db.findOne({id: rand})) != null ){
+        console.log(rand)
+        rand = Math.round(Math.random() * 1000000)
+    }
+    console.log(rand)
+    return rand
+
+    // docs = await db.find().toArray()
+    // for (i in docs){
+    //     console.log(docs[i].name)
+    // }
+}
+
 // * Corresponing post route for register
 app.post("/register", redirectHome, (req, res) => {
     const { name, email, password } = req.body
@@ -242,16 +258,22 @@ app.post("/register", redirectHome, (req, res) => {
     if (name && email && password){ //TODO validation better
         db.findOne({email: email}, (err, user) => {
             if (!user){
-                const user_ = {
-                    id: 5,
-                    name: name,
-                    email: email,
-                    password: password
-                }
+                getRandomID().then( rand=>{
+                    console.log("rand")
+                    console.log(rand)
+      
+                    const user_ = {
+                        id: rand,
+                        name: name,
+                        email: email,
+                        password: password
+                    }
+                    
+                    db.insertOne(user_);
+                    req.session.userID = user_.id
+                    return res.redirect("/home")
+                })
                 
-                db.insertOne(user_);
-                req.session.userID = user_.id
-                return res.redirect("/home")
             }
             else {
                 return res.redirect("/register") //TODO: query string parameters error maybe
@@ -302,12 +324,12 @@ client.connect().then(()=>{
     
     // The database
     db = client.db("boilerbot_web").collection("users")
-    // db.insertMany(users)
     db.find().toArray(function(err, docs) {
         for (i in docs){
             console.log(docs[i].name)
         }
     });
+
     app.listen(PORT, () =>
         console.log(`Starting server on http://localhost:${PORT}...`)
     )
