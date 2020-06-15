@@ -3,31 +3,29 @@
 
 // Code for server login based authenticated sessions in expressjs
 
-const express = require("express")
+const express         = require("express")
+const session         = require("express-session")
+const MongoStore      = require('connect-mongo')(session)
+const { MongoClient } = require('mongodb')
 
-// Define express app
+//Set up mongodb
+const MONGO_URI = "mongodb://localhost:27017/"
+const client = new MongoClient(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+
+// For env variables 
+const { 
+    PORT = 3000, 
+    NODE_ENV = "development", 
+    SESS_NAME='sid' 
+} = process.env 
+
 const app = express()
-
-// Sessions can be stored server-side (ex: user auth) or client-side
-// (ex: shopping cart). express-session saves sessions in a store, and
-// NOT in a cookie. To store sessions in a cookie, use cookie-session.
-const session = require("express-session")
-
-const MongoStore = require('connect-mongo')(session);
-const { MongoClient } = require('mongodb');
-const MONGO_URI = "mongodb://localhost:27017/";
-const client = new MongoClient(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-
-const { PORT = 3000, NODE_ENV = "development", SESS_NAME='sid' } = process.env
-
 app.use(express.json()) //Used to parse JSON bodies
 app.use(express.urlencoded({ extended: true }))
 
 app.use(
   // Creates a session middleware with given options.
     session({
-        // Defaults to MemoryStore, meaning sessions are stored as POJOs
-        // in server memory, and are wiped out when the server restarts.
         store: new MongoStore({
             url: "mongodb://localhost:27017/boilerbot_web",
             collection: "sessions_test"
@@ -104,7 +102,6 @@ app.use(
 )
 
 
-// * --- Done Config --- 
 const redirectLogin = (req, res, next) => {
     if (!req.session.userID){
         return res.redirect("/login")
@@ -144,20 +141,21 @@ app.get("/", (req, res) => {
     // Beware that express-session only updates req.session on req.end(),
     // so the values below are stale and will change after you read them
     // (assuming that you roll sessions with resave and rolling).
-    console.log("Cookie expires " + req.session.cookie.expires) // date of expiry
+    // console.log("Cookie expires " + req.session.cookie.expires) // date of expiry
     // console.log("Cookie maxage " + req.session.cookie.maxAge) // milliseconds left until expiry
 
     // Unless a valid session ID cookie is sent with the request,
     // the session ID below will be different for each request.
-    console.log("Session.id " + req.session.id) // ex: VdXZfzlLRNOU4AegYhNdJhSEquIdnvE-
+    // console.log("Session.id " + req.session.id) // ex: VdXZfzlLRNOU4AegYhNdJhSEquIdnvE-
 
     // Same as above. Alphanumeric ID that gets written to the cookie.
     // It's also the SESSION_ID portion in 's:{SESSION_ID}.{SIGNATURE}'.
     // console.log("Sessionid " + req.sessionID)
+
     const { userID } = req.session
 
     if (userID){
-        // Send homepage
+        // Send homepage if user was logged in: session has the user id saved
         res.send(`
             <h1>Main root page</h1>
 
@@ -187,6 +185,7 @@ app.get("/login", redirectHome, (req, res) => {
 
     res.send(`
         <h1>Login</h1>
+        <h2>${req.query.err?req.query.err:""}</h2>
         <form method='post' action='/login'>
             <input type="email" name="email" id="email" placeholder="email" required></input> 
             <input type="password" name="password" id="password" placeholder="password" required></input> 
@@ -203,20 +202,24 @@ app.post("/login", redirectHome, (req, res) => {
     const { email, password } = req.body
     let user = null;
     if (email && password){
-        //TODO hash
-        db.findOne({email: email, password: password}, (err, user) => {
+        db.findOne({email: email}, (err, user) => {
             if (user){
-                req.session.userID = user.id
-                return res.redirect("/home")
+                bcrypt.compare(password, user.password, function(err, result) {
+                    if (result == true){
+                        req.session.userID = user.id
+                        return res.redirect("/home")
+                    }
+                    else {
+                        return res.redirect("/login?err=" + encodeURIComponent('Incorrect username/password'));
+                    }
+                });
+            } else{
+                return res.redirect("/login?err=" + encodeURIComponent('Incorrect username/password'));   
             }
-
-            return res.redirect("/login")
         })
-
-        // return res.redirect("/login")
     }
     else {
-        return res.redirect("/login")
+        return res.redirect("/login?err=" + encodeURIComponent('Some other err'));
     }
 })
 
@@ -225,6 +228,7 @@ app.post("/login", redirectHome, (req, res) => {
 app.get("/register", redirectHome, (req, res) => {
     res.send(`
         <h1>Register</h1>
+        <h2>${req.query.err?req.query.err:"No error"}</h2>
         <form method='post' action='/register'>
             <input type="name" name="name" id="name" placeholder="name" required></input> 
             <input type="email" name="email" id="email" placeholder="email" required></input> 
@@ -235,21 +239,25 @@ app.get("/register", redirectHome, (req, res) => {
     `)
 })
 
-
-async function getRandomID(){
-    rand = Math.round(Math.random() * 1000000)
-    while ((await db.findOne({id: rand})) != null ){
-        console.log(rand)
-        rand = Math.round(Math.random() * 1000000)
-    }
-    console.log(rand)
-    return rand
-
-    // docs = await db.find().toArray()
-    // for (i in docs){
-    //     console.log(docs[i].name)
-    // }
+// for 10^6 possible id's
+const MAX_NUM_ACCOUNTS = Math.pow(10, 6)
+function random_nozero(){
+    return Math.floor(Math.random() * MAX_NUM_ACCOUNTS) + 1
 }
+
+// Get random ID that is not currently in the database
+async function getRandomID(){
+    var rand = random_nozero()
+
+    while ((await db.findOne({id: rand})) != null ){
+        console.log("Duplicate found. Finding another ID")
+        rand = random_nozero()
+    }
+    return rand
+}
+
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 // * Corresponing post route for register
 app.post("/register", redirectHome, (req, res) => {
@@ -259,26 +267,23 @@ app.post("/register", redirectHome, (req, res) => {
         db.findOne({email: email}, (err, user) => {
             if (!user){
                 getRandomID().then( rand=>{
-                    console.log("rand")
-                    console.log(rand)
-      
-                    const user_ = {
-                        id: rand,
-                        name: name,
-                        email: email,
-                        password: password
-                    }
-                    
-                    db.insertOne(user_);
-                    req.session.userID = user_.id
-                    return res.redirect("/home")
-                })
-                
+                    bcrypt.hash(password, saltRounds, function(err, hash){
+                        const user_ = {
+                            id: rand,
+                            name: name,
+                            email: email,
+                            password: hash
+                        }
+
+                        db.insertOne(user_);
+                        req.session.userID = user_.id
+                        return res.redirect("/home")
+                    })
+                }).catch((err) => {return res.redirect("/register")});
             }
             else {
-                return res.redirect("/register") //TODO: query string parameters error maybe
+                res.redirect("/register?err=" + encodeURIComponent('User with that email-id already exists!')); 
             }
-
         })      
     }
 })
@@ -294,6 +299,7 @@ app.get("/home", redirectLogin, (req, res) => {
         <ul>
             <li> Name: ${user.name}
             <li> Email:  ${user.email}
+            <li> Password hash:  ${user.password}
         </ul>
         `)
     })
@@ -317,6 +323,7 @@ app.post("/logout", redirectLogin, (req, res) => {
   })
 })
 
+// client.db.collection object for mongodb. Will be updated after this for all functions to use
 var db = null;
 
 client.connect().then(()=>{
@@ -324,15 +331,13 @@ client.connect().then(()=>{
     
     // The database
     db = client.db("boilerbot_web").collection("users")
-    db.find().toArray(function(err, docs) {
-        for (i in docs){
-            console.log(docs[i].name)
-        }
-    });
+    // db.find().toArray(function(err, docs) {
+    //     for (i in docs){
+    //         console.log(docs[i].name)
+    //     }
+    // });
 
     app.listen(PORT, () =>
         console.log(`Starting server on http://localhost:${PORT}...`)
     )
 }).catch(err => console.log(err));
-
-
