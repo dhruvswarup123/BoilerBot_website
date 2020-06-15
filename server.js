@@ -7,10 +7,18 @@ const express         = require("express")
 const session         = require("express-session")
 const MongoStore      = require('connect-mongo')(session)
 const { MongoClient } = require('mongodb')
+var mongoDbQueue = require('mongodb-queue')
 
 //Set up mongodb
 const MONGO_URI = "mongodb://localhost:27017/"
-const client = new MongoClient(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+const client = new MongoClient(MONGO_URI, 
+{ 
+    useNewUrlParser: true, 
+    useUnifiedTopology: true 
+})
+
+
+
 
 // For env variables 
 const { 
@@ -230,7 +238,7 @@ app.get("/register", redirectHome, (req, res) => {
         <h1>Register</h1>
         <h2>${req.query.err?req.query.err:"No error"}</h2>
         <form method='post' action='/register'>
-            <input type="name" name="name" id="name" placeholder="name" required></input> 
+            <input type="input" name="name" id="name" placeholder="name" required></input> 
             <input type="email" name="email" id="email" placeholder="email" required></input> 
             <input type="password" name="password" id="password" placeholder="password" required></input> 
             <button type="submit">Submit</button>
@@ -301,6 +309,14 @@ app.get("/home", redirectLogin, (req, res) => {
             <li> Email:  ${user.email}
             <li> Password hash:  ${user.password}
         </ul>
+
+        <h2>Insert task to queue</h2>
+        <h3>${req.query.add_queue_err?req.query.add_queue_err:""}<h3>
+        <form method='post' action='/add_queue'>
+            <input type="hidden" name="source" value = ${user.id} />
+            <input type="text" name="destination" id="destination" placeholder="destination email" required></input> 
+            <button type="submit">Submit</button>
+        </form>
         `)
     })
 })
@@ -323,14 +339,39 @@ app.post("/logout", redirectLogin, (req, res) => {
   })
 })
 
+app.post("/add_queue", redirectLogin, (req, res) => {
+    const {source, destination} = req.body
+    db.findOne({email: destination}, (err, user) => {
+        if (user && (user.id != parseInt(source))){
+            const payload = {
+                from: parseInt(source),
+                to: user.id,
+                inserted_at: Date.now(),
+            }
+
+            queue.add(payload, (err, id) => {   })
+            return res.redirect("/home?add_queue_err=" + encodeURIComponent("Success!"))
+        }
+        else if ((user.id == parseInt(source))) {
+            return res.redirect("/home?add_queue_err=" + encodeURIComponent("Cant add yourself!"))
+        }
+        else{
+            return res.redirect("/home?add_queue_err=" + encodeURIComponent("Destination not found"))
+        }
+    })
+})
+
 // client.db.collection object for mongodb. Will be updated after this for all functions to use
 var db = null;
+var queue = null;
 
-client.connect().then(()=>{
+client.connect().then( err => {
     console.log("Connected to MongoDB users server!")
     
     // The database
     db = client.db("boilerbot_web").collection("users")
+    queue = mongoDbQueue(client.db("boilerbot_web"), 'queue')
+
     // db.find().toArray(function(err, docs) {
     //     for (i in docs){
     //         console.log(docs[i].name)
