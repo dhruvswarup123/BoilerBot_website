@@ -2,13 +2,13 @@
 // and based on youtube tutorial https://www.youtube.com/watch?v=OH6Z0dJ_Huk&list=FL553-LfOaFIPeOrDw8y9cSA&index=2&t=0s
 
 // Code for server login based authenticated sessions in expressjs
-
+const path            = require("path")
 const express         = require("express")
 const session         = require("express-session")
 const MongoStore      = require('connect-mongo')(session)
 const { MongoClient } = require('mongodb')
 var mongoDbQueue = require('mongodb-queue')
-
+const bodyparser = require("body-parser")
 //Set up mongodb
 const MONGO_URI = "mongodb://localhost:27017/"
 const client = new MongoClient(MONGO_URI, 
@@ -16,8 +16,6 @@ const client = new MongoClient(MONGO_URI,
     useNewUrlParser: true, 
     useUnifiedTopology: true 
 })
-
-
 
 
 // For env variables 
@@ -28,8 +26,11 @@ const {
 } = process.env 
 
 const app = express()
+app.set('view engine', 'pug')
+app.use(express.static("public"));
 app.use(express.json()) //Used to parse JSON bodies
 app.use(express.urlencoded({ extended: true }))
+app.use(bodyparser.json());
 
 app.use(
   // Creates a session middleware with given options.
@@ -127,7 +128,7 @@ const redirectHome = (req, res, next) => {
         next()
     }
 }
-
+app.set('views','./views');
 // * To get the main page
 app.get("/", (req, res) => {
     // A new uninitialized session is created for each request (but not
@@ -164,22 +165,10 @@ app.get("/", (req, res) => {
 
     if (userID){
         // Send homepage if user was logged in: session has the user id saved
-        res.send(`
-            <h1>Main root page</h1>
-
-            <a href='/home'>home</a>
-            <form method='post' action='/logout'>
-                <button>Logout</button>
-            </form>
-        `)
+        res.redirect("/home")
     }
     else {
-        res.send(`
-            <h1>Main root page</h1>
-
-            <a href='/login'>Login</a>
-            <a href='/register'>Register</a>
-        `)
+        res.render("root")
     }
 })
 
@@ -190,17 +179,10 @@ app.get("/login", redirectHome, (req, res) => {
     // request. After we modify that session and during req.end(), it gets
     // persisted. On subsequent writes, it's updated and synced with the store.
     // req.session.userId = 1
-
-    res.send(`
-        <h1>Login</h1>
-        <h2>${req.query.err?req.query.err:""}</h2>
-        <form method='post' action='/login'>
-            <input type="email" name="email" id="email" placeholder="email" required></input> 
-            <input type="password" name="password" id="password" placeholder="password" required></input> 
-            <button type="submit">Submit</button>
-        </form>
-        <a href='/register'>Register</a>
-    `)
+    // res.sendFile('login.html', {
+    //     root: path.join(__dirname, './views/')
+    // })
+    res.render("login", {err:req.query.err})
 })
 
 // db.insertOne({id: 3, name: 'lee', email: 'lee@gmail.com', password: 'passl'})
@@ -234,17 +216,7 @@ app.post("/login", redirectHome, (req, res) => {
 
 // * To get the register html
 app.get("/register", redirectHome, (req, res) => {
-    res.send(`
-        <h1>Register</h1>
-        <h2>${req.query.err?req.query.err:"No error"}</h2>
-        <form method='post' action='/register'>
-            <input type="input" name="name" id="name" placeholder="name" required></input> 
-            <input type="email" name="email" id="email" placeholder="email" required></input> 
-            <input type="password" name="password" id="password" placeholder="password" required></input> 
-            <button type="submit">Submit</button>
-        </form>
-        <a href='/login'>Login</a>
-    `)
+    res.render("register", {err:req.query.err})
 })
 
 // for 10^6 possible id's
@@ -269,9 +241,9 @@ const saltRounds = 10;
 
 // * Corresponing post route for register
 app.post("/register", redirectHome, (req, res) => {
-    const { name, email, password } = req.body
+    const { name, email, password, confirm_password } = req.body
 
-    if (name && email && password){ //TODO validation better
+    if (name && email && password && (password == confirm_password)){ //TODO validation better
         db.findOne({email: email}, (err, user) => {
             if (!user){
                 getRandomID().then( rand=>{
@@ -294,30 +266,16 @@ app.post("/register", redirectHome, (req, res) => {
             }
         })      
     }
+    else {
+        res.redirect("/register?err=" + encodeURIComponent('Passwords do not match!'));
+    }
 })
 
 
 // * Homepage after login
 app.get("/home", redirectLogin, (req, res) => {
     db.findOne({id: req.session.userID}, (err, user) => {
-        res.send(`
-        <h1>home after login</h1>
-
-        <a href='/'>Go to Main</a>
-        <ul>
-            <li> Name: ${user.name}
-            <li> Email:  ${user.email}
-            <li> Password hash:  ${user.password}
-        </ul>
-
-        <h2>Insert task to queue</h2>
-        <h3>${req.query.add_queue_err?req.query.add_queue_err:""}<h3>
-        <form method='post' action='/add_queue'>
-            <input type="hidden" name="source" value = ${user.id} />
-            <input type="text" name="destination" id="destination" placeholder="destination email" required></input> 
-            <button type="submit">Submit</button>
-        </form>
-        `)
+        res.render("home", {user:user, err:req.query.add_queue_err})
     })
 })
 
@@ -342,28 +300,59 @@ app.post("/logout", redirectLogin, (req, res) => {
 app.post("/add_queue", redirectLogin, (req, res) => {
     const {source, destination} = req.body
     db.findOne({email: destination}, (err, user) => {
-        if (user && (user.id != parseInt(source))){
+        if (!user){
+            return res.redirect("/home?add_queue_err=" + encodeURIComponent("Destination not found"))
+        }
+        if (user.id != parseInt(source)){
             const payload = {
                 from: parseInt(source),
-                to: user.id,
+                to: user,
                 inserted_at: Date.now(),
             }
 
             queue.add(payload, (err, id) => {   })
             return res.redirect("/home?add_queue_err=" + encodeURIComponent("Success!"))
         }
-        else if ((user.id == parseInt(source))) {
+        else {
             return res.redirect("/home?add_queue_err=" + encodeURIComponent("Cant add yourself!"))
         }
-        else{
-            return res.redirect("/home?add_queue_err=" + encodeURIComponent("Destination not found"))
-        }
     })
+})
+
+
+app.get("/update_queue_deets", redirectLogin, (req, res) => {
+    queue_db.find({}, (err, obs) => {
+        obs.toArray((err, docs) => {
+            out = []
+            for (i in docs){
+                if (docs[i].payload.from == parseInt(req.session.userID)){
+                    out.push({pos: i, document:docs[i]})
+                }
+            }
+            res.send(out)
+        })
+    })
+})
+
+app.post("/remove_from_queue", redirectLogin, (req, res) => {
+    console.log(req.body);      // your JSON
+    // queue_db.find({_id:req.body}, (err, obs) => {
+    //     obs.toArray((err, docs) => {
+    //         out = []
+    //         for (i in docs){
+    //             if (docs[i].payload.from == parseInt(req.session.userID)){
+    //                 out.push({pos: i, document:docs[i]})
+    //             }
+    //         }
+    //         res.send(out)
+    //     })
+    // })
 })
 
 // client.db.collection object for mongodb. Will be updated after this for all functions to use
 var db = null;
 var queue = null;
+var queue_db = null;
 
 client.connect().then( err => {
     console.log("Connected to MongoDB users server!")
@@ -371,7 +360,7 @@ client.connect().then( err => {
     // The database
     db = client.db("boilerbot_web").collection("users")
     queue = mongoDbQueue(client.db("boilerbot_web"), 'queue')
-
+    queue_db = client.db("boilerbot_web").collection("queue")
     // db.find().toArray(function(err, docs) {
     //     for (i in docs){
     //         console.log(docs[i].name)

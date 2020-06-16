@@ -1,0 +1,19 @@
+doctype html
+h1 login
+h2 
+    if err
+        = err
+    else
+        | no err
+
+form(method='POST' action='/login')
+    input.form-input(type='email' placeholder='name@email.com' name='email' required)
+
+    input.form-input(type='password' placeholder='password' name='password' required)
+    
+    button.btn.btn-primary(type='submit') Login
+
+a(href='/register') Register
+
+script(src="/js/login.js")
+link(rel="stylesheet" type="text/css" href="/css/login.css")

@@ -1,0 +1,34 @@
+doctype html
+h1 home after login
+
+form(method='POST' action='/logout')
+    button Logout
+
+ul
+    li Name: #{user.name}
+    li Email: #{user.email}
+    li Password hash: #{user.password}
+
+h3 Current position in queue
+    div
+        | This is the currpos
+
+h2 Your requests: 
+div(id="requests")
+    | No requests from you
+
+h2 Insert task to queue
+if err
+    = err
+else
+    | no err
+
+form(method='POST' action='/add_queue')
+    input.form-input(type="hidden" name="source" value = user.id)
+    input.form-input(type="email" name="destination" id="destination" placeholder="destination email" required)
+    
+    button.btn.btn-primary(type='submit') Submit
+
+script(src="/js/home.js")
+
+
