@@ -66,7 +66,9 @@
     transition-duration: 200ms;
     transition-timing-function: linear; 
     position: fixed;
-} */
+    left: 100px;
+    top: 100pxx;
+}  */
 
 h1{
     margin-top: 200px;

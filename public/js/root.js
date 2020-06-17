@@ -22,13 +22,14 @@
 //         car.x += car.v * v_x
 //         car.y += car.v * v_y
 //     }
-    
-// }
 
-// function render(){
 //     car.elem.style.left = car.x + 'px';
 //     car.elem.style.top = car.y + 'px';
 // }
 
-// setInterval(render, 10)
+// // function render(){
+    
+// // }
+
+// // setInterval(render, 10)
 // setInterval(update, 10)
