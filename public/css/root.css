@@ -29,14 +29,47 @@
     background-color: orangered;
 }
 
-#car{
-    /* transition-duration: 200ms;
-    transition-timing-function: linear; */
-    position: fixed;
+#signature{
+    position: absolute;
+    font-family: "Viga";
+    /* writing-mode: vertical-rl;
+    text-orientation: mixed; */
+    background-color: #00000000;
+    font-size: 15px;
+    bottom: 30px;
+    color: #00000030;
+    right: 0px;
+    transition-duration: 0.2s;
+    letter-spacing: 0.05em;
+}
+.social{
+    position: absolute;
+    bottom: 50px;
+    right: 0px;
+    background-color: #00000000;
+}
+#github{
+    width: 45px;
+    transition-duration: 0.3s;
+    background-color: #00000000;
 }
 
+#github:hover{
+    width: 64px;
+}
+
+#orangeRect:hover #signature{
+    color: white;
+}
+
+/* #car{
+    transition-duration: 200ms;
+    transition-timing-function: linear; 
+    position: fixed;
+} */
+
 h1{
-    margin-top: 15%;
+    margin-top: 200px;
     margin-bottom: 50px;
 
     font-family: 'Viga';
@@ -62,25 +95,14 @@ h1{
     transition-duration: 0.3s;
     text-align: center;
     font-weight: bold;
+    color: black;
 }
 
 .button:hover{
+    color: white;
     cursor: pointer;
     border-color: orangered;
     width: 50%;
     background-color: orangered;
 }
 
-.social{
-    position: absolute;
-    bottom: 10px;
-    right: 0px;
-}
-#github{
-    width: 45px;
-    transition-duration: 0.3s;
-}
-
-#github:hover{
-    width: 64px;
-}
