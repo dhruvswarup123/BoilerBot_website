@@ -1,5 +1,10 @@
 var currList = null
-
+function getRemoveButton(dataelem) {
+    return `<form method='POST' action='/remove_from_queue'">
+                <input type="hidden" name="id" value=${JSON.stringify(dataelem.document._id)}>
+                <button type="submit">remove element?</button>
+            </form>`
+}
 function updatePage(){
     fetch('/update_queue_deets')
     .then(response => response.json())
@@ -11,7 +16,8 @@ function updatePage(){
         for (i in data){
             let temp = document.createElement('div')
             date = new Date(data[i].document.payload.inserted_at*1000)
-            temp.innerHTML = `position: ${data[i].pos} ------ to: ${data[i].document.payload.to.email} <button onclick="remove_from_queue(${i})">remove element?</button>`
+            temp.innerHTML = `position: ${data[i].pos} ------ to: ${data[i].document.payload.to.email} ${getRemoveButton(data[i])}`
+            
             arr.appendChild(temp)
             currList.push(data[i])
         }
@@ -22,15 +28,6 @@ function updatePage(){
 
     });
     // setTimeout(updatePage, 1000)
-}
-
-function remove_from_queue(i){
-    console.log(`removing item number ${currList[i].pos}`)
-    fetch("/remove_from_queue", {
-        method:"post", 
-        'Content-Type': 'application/json',
-        body:  JSON.stringify({a:currList[i].document})
-    })
 }
 
 updatePage()

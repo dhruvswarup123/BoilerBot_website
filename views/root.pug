@@ -1,8 +1,23 @@
 doctype html
-h1 Main root page
+head
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Viga")
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat")
+    script(src="/js/root.js")
+    link(rel="stylesheet" type="text/css" href="/css/root.css") 
+//- canvas#myCanvas
 
-a.abcd(href='/login') Login
-a.abcd(href='/register') Register
+div#info
+    h1(id="heading") BoilerBot.
+    //- img#car(src="/resources/car.png" width="50px" )
 
-script(src="/js/root.js")
-link(rel="stylesheet" type="text/css" href="/css/root.css")
+    form(action='/login')
+        button.button(type='submit') Login
+
+    form(action='/register')
+        button.button(type='submit') Register
+    
+    a.social(href='/')
+        img#github(src='/resources/GitHub-Mark-64px.png', width="45px")
+    
+
+div#orangeRect

@@ -6,7 +6,7 @@ const path            = require("path")
 const express         = require("express")
 const session         = require("express-session")
 const MongoStore      = require('connect-mongo')(session)
-const { MongoClient } = require('mongodb')
+const { MongoClient, ObjectID } = require('mongodb')
 var mongoDbQueue = require('mongodb-queue')
 const bodyparser = require("body-parser")
 //Set up mongodb
@@ -335,18 +335,13 @@ app.get("/update_queue_deets", redirectLogin, (req, res) => {
 })
 
 app.post("/remove_from_queue", redirectLogin, (req, res) => {
-    console.log(req.body);      // your JSON
-    // queue_db.find({_id:req.body}, (err, obs) => {
-    //     obs.toArray((err, docs) => {
-    //         out = []
-    //         for (i in docs){
-    //             if (docs[i].payload.from == parseInt(req.session.userID)){
-    //                 out.push({pos: i, document:docs[i]})
-    //             }
-    //         }
-    //         res.send(out)
-    //     })
-    // })
+    const { id } = req.body
+    // console.log(id);      // your JSON
+
+    queue_db.deleteOne({_id:ObjectID(id)}, (res_) => {
+        return res.redirect("/home?add_queue_err=" + encodeURIComponent("Removed Successfully!"))
+    })
+    
 })
 
 // client.db.collection object for mongodb. Will be updated after this for all functions to use
