@@ -31,16 +31,16 @@
 
 #signature{
     position: absolute;
-    font-family: "Viga";
+    font-family: "Montserrat";
     /* writing-mode: vertical-rl;
     text-orientation: mixed; */
     background-color: #00000000;
     font-size: 15px;
     bottom: 30px;
-    color: #00000030;
+    color: #00000040;
+    font-weight: bold;
     right: 0px;
     transition-duration: 0.2s;
-    letter-spacing: 0.05em;
 }
 .social{
     position: absolute;
