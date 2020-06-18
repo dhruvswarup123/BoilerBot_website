@@ -80,6 +80,10 @@ h1{
     font-size: 100px;
 }
 
+#heading_link{
+    text-decoration: none;
+}
+
 .button{
     /* display: inline-block; */
     margin: 0px;
@@ -106,4 +110,25 @@ h1{
     border-color: orangered;
     width: 400px;
     background-color: orangered;
+}
+
+#page_info{
+    margin: 0px;
+    padding: 0px;
+    position: absolute;
+    font-family: "Montserrat";
+    font-size: 80px;
+    font-weight: lighter;
+    transform: rotate(180deg);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    right: -20px;
+    top: 100px;
+    background-color: #00000000;
+    background: linear-gradient(to right, #FF4500 20px,#FFFFFF 0px);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    color: transparent
 }

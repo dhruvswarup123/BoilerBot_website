@@ -5,9 +5,8 @@ head
     link(rel="stylesheet" type="text/css" href="/css/root.css") 
     link(rel="stylesheet" type="text/css" href="/css/login.css") 
 
-
 div#info
-    h1(id="heading") BoilerBot.
+    h1(id="heading") #[a#heading_link(href='/') BoilerBot.]
    
     form(method='POST' action='/login')
         input.input(type='email' placeholder='email' name='email' required)
@@ -32,6 +31,7 @@ div#info
         | website by #[a#sig_gh(href='https://github.com/dhruvswarup123/') dhruv swarup]
 
 div#orangeRect
-  
+    div#page_info login
+    
 
 //- script(src="/js/lo.js")
