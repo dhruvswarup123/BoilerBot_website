@@ -57,7 +57,7 @@
 #err{
     margin-bottom: 20px;
     font-family: "Montserrat";
-    font-style: oblique;
+    /* font-style: oblique; */
     color: orangered;
     font-size: 12px
 }

@@ -10,6 +10,10 @@ div#info
     h1(id="heading") #[a#heading_link(href='/') BoilerBot.]
    
     form(method='POST' action='/register')
+        if err
+            div#err 
+                | #{err}
+
         input.input(type='input' placeholder='name' name='name' required)
         br
         input.input(type='email' placeholder='name@email.com' name='email' required)
@@ -17,12 +21,7 @@ div#info
         input.input(type='password' placeholder='password' name='password' required)
         br
         input.input(type='password' placeholder='confirm password' name='confirm_password' required)         
-        if err
-            div#err 
-                | #{err}
-        else
-            br
-
+        br
         button.button#submit(type='submit') submit
 
     form(action='/login')
