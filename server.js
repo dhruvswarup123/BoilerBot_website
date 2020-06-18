@@ -200,16 +200,16 @@ app.post("/login", redirectHome, (req, res) => {
                         return res.redirect("/home")
                     }
                     else {
-                        return res.redirect("/login?err=" + encodeURIComponent('Incorrect username/password'));
+                        return res.redirect("/login?err=" + encodeURIComponent('incorrect username or password'));
                     }
                 });
             } else{
-                return res.redirect("/login?err=" + encodeURIComponent('Incorrect username/password'));   
+                return res.redirect("/login?err=" + encodeURIComponent('incorrect username or password'));   
             }
         })
     }
     else {
-        return res.redirect("/login?err=" + encodeURIComponent('Some other err'));
+        return res.redirect("/login?err=" + encodeURIComponent('fields were left blank'));
     }
 })
 
@@ -243,32 +243,33 @@ const saltRounds = 10;
 app.post("/register", redirectHome, (req, res) => {
     const { name, email, password, confirm_password } = req.body
 
-    if (name && email && password && (password == confirm_password)){ //TODO validation better
-        db.findOne({email: email}, (err, user) => {
-            if (!user){
-                getRandomID().then( rand=>{
-                    bcrypt.hash(password, saltRounds, function(err, hash){
-                        const user_ = {
-                            id: rand,
-                            name: name,
-                            email: email,
-                            password: hash
-                        }
+    db.findOne({email: email}, (err, user) => {
+        if (!user){
+            if (password.length < 5){
+                return res.redirect("/register?err=" + encodeURIComponent('password must be at least 5 characters')); 
+            }
+            if (password != confirm_password){
+                return res.redirect("/register?err=" + encodeURIComponent('passwords do not match'));  
+            }
+            getRandomID().then( rand=>{
+                bcrypt.hash(password, saltRounds, function(err, hash){
+                    const user_ = {
+                        id: rand,
+                        name: name,
+                        email: email,
+                        password: hash
+                    }
 
-                        db.insertOne(user_);
-                        req.session.userID = user_.id
-                        return res.redirect("/home")
-                    })
-                }).catch((err) => {return res.redirect("/register")});
-            }
-            else {
-                res.redirect("/register?err=" + encodeURIComponent('User with that email-id already exists!')); 
-            }
-        })      
-    }
-    else {
-        res.redirect("/register?err=" + encodeURIComponent('Passwords do not match!'));
-    }
+                    db.insertOne(user_);
+                    req.session.userID = user_.id
+                    return res.redirect("/home")
+                })
+            }).catch((err) => {return res.redirect("/register")});
+        }
+        else {
+            res.redirect("/register?err=" + encodeURIComponent('user with that email-id already exists')); 
+        }
+    }) 
 })
 
 

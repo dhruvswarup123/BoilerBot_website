@@ -4,13 +4,8 @@
     margin: 0px;
     padding: 0px;
     text-align: right;
+    outline: none;
 }
-/* #myCanvas{
-    position: fixed;
-
-    width: 100%;
-    height: 100%;
-} */
 
 #info{
     position: fixed;
@@ -32,16 +27,26 @@
 #signature{
     position: absolute;
     font-family: "Montserrat";
-    /* writing-mode: vertical-rl;
-    text-orientation: mixed; */
     background-color: #00000000;
-    font-size: 15px;
+    font-size: 12px;
     bottom: 30px;
-    color: #00000040;
+    color: #80808050;
     font-weight: bold;
+    right: 0px;
+}
+
+#sig_gh{
+    color: #80808050;
+    font-weight: bold;
+    /* text-decoration: none; */
     right: 0px;
     transition-duration: 0.2s;
 }
+
+#sig_gh:hover{
+    color: orangered;
+}
+
 .social{
     position: absolute;
     bottom: 50px;
@@ -56,10 +61,6 @@
 
 #github:hover{
     width: 64px;
-}
-
-#orangeRect:hover #signature{
-    color: white;
 }
 
 /* #car{
@@ -89,9 +90,8 @@ h1{
     padding-top: 10px;
     padding-bottom: 10px;
 
-    border: 10px solid black;
-    border-width: 2px;
-    width: 25%;
+    border: 2px solid black;
+    width: 350px;
     margin-bottom: 10px;
     font-size: 17px;
     transition-duration: 0.3s;
@@ -104,7 +104,6 @@ h1{
     color: white;
     cursor: pointer;
     border-color: orangered;
-    width: 50%;
+    width: 400px;
     background-color: orangered;
 }
-

@@ -1,20 +1,37 @@
 doctype html
-h1 Register
-h2 
-    if err
-        = err
-    else
-        | no err
+head
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Viga")
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat")
+    link(rel="stylesheet" type="text/css" href="/css/root.css") 
+    link(rel="stylesheet" type="text/css" href="/css/login.css") 
 
-form(method='POST' action='/register')
-    input.form-input(type='input' placeholder='name' name='name' required)
-    input.form-input(type='email' placeholder='name@email.com' name='email' required)
-    input.form-input(type='password' placeholder='password' name='password' required)
-    input.form-input(type='password' placeholder='confirm password' name='confirm_password' required)
+
+div#info
+    h1(id="heading") BoilerBot.
+   
+    form(method='POST' action='/register')
+        input.input(type='input' placeholder='name' name='name' required)
+        br
+        input.input(type='email' placeholder='name@email.com' name='email' required)
+        br
+        input.input(type='password' placeholder='password' name='password' required)
+        br
+        input.input(type='password' placeholder='confirm password' name='confirm_password' required)         
+        if err
+            div#err 
+                | #{err}
+        else
+            br
+
+        button.button#submit(type='submit') submit
+
+    form(action='/login')
+        button.button#register(type='submit') already have an account
     
-    button.btn.btn-primary(type='submit') Register
+    a.social(href='/')
+        img#github(src='/resources/GitHub-Mark-64px.png', width="45px")
+    
+    div#signature
+        | website by #[a#sig_gh(href='https://github.com/dhruvswarup123/') dhruv swarup]
 
-a(href='/login') Login
-
-//- script(src="/js/login.js")
-//- link(rel="stylesheet" type="text/css" href="/css/login.css")
+div#orangeRect

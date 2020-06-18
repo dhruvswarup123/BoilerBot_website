@@ -2,13 +2,12 @@ doctype html
 head
     link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Viga")
     link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat")
-    
+    link(rel="stylesheet" type="text/css" href="/css/root.css") 
 //- canvas#myCanvas
 
 div#info
     h1(id="heading") BoilerBot.
    
-
     form(action='/login')
         button.button(type='submit') login
 
@@ -19,7 +18,7 @@ div#info
         img#github(src='/resources/GitHub-Mark-64px.png', width="45px")
     
     div#signature
-        | website by dhruv swarup
+        | website by #[a#sig_gh(href='https://github.com/dhruvswarup123/') dhruv swarup]
 
 
 div#orangeRect
@@ -27,4 +26,3 @@ div#orangeRect
 //- img#car(src="/resources/car.png" width="50px" )
 
 script(src="/js/root.js")
-link(rel="stylesheet" type="text/css" href="/css/root.css") 
