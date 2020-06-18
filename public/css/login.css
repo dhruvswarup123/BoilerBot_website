@@ -22,7 +22,13 @@
     color: black;
     /* text-align: right; */
 }
-
+.input:hover{
+    width: 400px;
+    background-color: #FF4500;
+    outline: none;
+    border-color: orangered;
+    color:white;
+}
 .input:focus{
     width: 400px;
     background-color: #FF4500;
@@ -35,6 +41,10 @@
 }
 
 .input:focus::placeholder{
+    color:white;
+}
+
+.input:hover::placeholder{
     color:white;
 }
 
