@@ -22,6 +22,10 @@
     color: black;
     /* text-align: right; */
 }
+.input::placeholder{
+    color: #80808050;
+}
+
 .input:hover{
     width: 400px;
     background-color: #FF4500;
@@ -29,24 +33,21 @@
     border-color: orangered;
     color:white;
 }
-.input:focus{
-    width: 400px;
-    background-color: #FF4500;
-    outline: none;
-    border-color: orangered;
-    color:white;
-}
-.input::placeholder{
-    color: #80808050;
-}
-
-.input:focus::placeholder{
-    color:white;
-}
-
 .input:hover::placeholder{
     color:white;
 }
+
+.input:focus{
+    width: 400px;
+    background-color: white;
+    outline: none;
+    border-color: orangered;
+    color:black;
+}
+.input:focus::placeholder{
+    color: black;
+}
+
 
 #register{
     position: absolute;
