@@ -113,7 +113,7 @@ app.use(
 
 const redirectLogin = (req, res, next) => {
     if (!req.session.userID){
-        return res.redirect("/login")
+        return res.redirect("/login?err=" + encodeURIComponent('error logging in. please try again'))
     }
     else {
         next()
@@ -299,7 +299,7 @@ app.post("/logout", redirectLogin, (req, res) => {
 })
 
 app.post("/add_queue", redirectLogin, (req, res) => {
-    const {source, destination} = req.body
+    const {source, destination, purpose} = req.body
     db.findOne({email: destination}, (err, user) => {
         if (!user){
             return res.redirect("/home?add_queue_err=" + encodeURIComponent("Destination not found"))
@@ -309,6 +309,7 @@ app.post("/add_queue", redirectLogin, (req, res) => {
                 from: parseInt(source),
                 to: user,
                 inserted_at: Date.now(),
+                purpose: purpose,
             }
 
             queue.add(payload, (err, id) => {   })

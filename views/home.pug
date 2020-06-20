@@ -1,34 +1,54 @@
 doctype html
-h1 home after login
+head
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Viga")
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat")
+    link(rel="stylesheet" type="text/css" href="/css/root.css") 
+    link(rel="stylesheet" type="text/css" href="/css/login.css") 
+    link(rel="stylesheet" type="text/css" href="/css/home.css") 
 
-form(method='POST' action='/logout')
-    button Logout
+div#info
+    //- Logout button
+    form(method='POST' action='/logout')
+        button.button#logout logout
 
-ul
-    li Name: #{user.name}
-    li Email: #{user.email}
-    li Password hash: #{user.password}
+    //- Display user details
+    ul.details
+        if user
+            li#name #{user.name.toLowerCase()}
+            li#email #{user.email.toLowerCase()}
+            li
+                button#edit edit details
 
-h3 Current position in queue
-    div
-        | This is the currpos
+    //- Show the queue table/list ++ have a remove button
+    div#requests
+        div#requests_text your requests
 
-h2 Your requests: 
-div(id="requests")
-    | No requests from you
+        table#requests_list
+            tr 
+                th position
+                th name
+                th email
+                th purpose
+                th status
 
-h2 Insert task to queue
-if err
-    = err
-else
-    | no err
+        //- Add more options here if needed
+        div#new_request new request
+            div#err
+                if err
+                    = err
 
-form(method='POST' action='/add_queue')
-    input.form-input(type="hidden" name="source" value = user.id)
-    input.form-input(type="email" name="destination" id="destination" placeholder="destination email" required)
-    
-    button.btn.btn-primary(type='submit') Submit
+            form(method='POST' action='/add_queue')
+                input.input(type="hidden" name="source" value = user.id)
+                input.input#new_email(type="email" name="destination" placeholder="destination email" required)
+                br
+                input.input#new_email(type="text" name="purpose" placeholder="purpose" required)
+                br
+                button.button#submit(type='submit') Submit
+                br
+                
+
+div#orangeRect
+    div#page_info homepage
+
 
 script(src="/js/home.js")
-
-
