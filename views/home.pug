@@ -20,31 +20,30 @@ div#info
                 button#edit edit details
 
     //- Show the queue table/list ++ have a remove button
-    div#requests
-        div#requests_text your requests
+    div#requests_text your requests
 
-        table#requests_list
-            tr 
-                th position
-                th name
-                th email
-                th purpose
-                th status
+    table#requests_list
+        tr 
+            th position
+            th name
+            th email
+            th purpose
+            th status
 
-        //- Add more options here if needed
-        div#new_request new request
-            div#err
-                if err
-                    = err
+    //- Add more options here if needed
+    div#new_request new request
+        div#err
+            if err
+                = err
 
-            form(method='POST' action='/add_queue')
-                input.input(type="hidden" name="source" value = user.id)
-                input.input#new_email(type="email" name="destination" placeholder="destination email" required)
-                br
-                input.input#new_email(type="text" name="purpose" placeholder="purpose" required)
-                br
-                button.button#submit(type='submit') Submit
-                br
+        form(method='POST' action='/add_queue')
+            input.input(type="hidden" name="source" value = user.id)
+            input.input#new_email(type="email" name="destination" placeholder="destination email" required)
+            br
+            input.input#new_email(type="text" name="purpose" placeholder="purpose" required)
+            br
+            button.button#submit(type='submit') Submit
+            br
                 
 
 div#orangeRect
