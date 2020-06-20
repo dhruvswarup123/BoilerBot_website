@@ -13,6 +13,15 @@
     background-color: orangered;
 }
 
+#name{
+    font-weight: bold;
+
+}
+
+#email{
+    font-style: oblique;
+}
+
 .details{
     margin-top: 30px;
     font-family: "Montserrat";
@@ -42,6 +51,7 @@
 #requests_list {
     display: block;
     width: 500px;
+    
     right: 0px;
     font-family: "Montserrat";
 
@@ -51,6 +61,10 @@
     border: 1px solid orangered;
     overflow-y: auto; 
 }
+
+/* table::-webkit-scrollbar{
+    width: 1px;
+} */
 
 #requests_text{
     font-family: "Viga";

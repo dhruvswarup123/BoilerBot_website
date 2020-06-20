@@ -305,6 +305,9 @@ app.post("/add_queue", redirectLogin, (req, res) => {
             return res.redirect("/home?add_queue_err=" + encodeURIComponent("Destination not found"))
         }
         if (user.id != parseInt(source)){
+            if (purpose.length > 25){
+                return res.redirect("/home?add_queue_err=" + encodeURIComponent("Purpose must be shorter than 25 chars"))
+            }
             const payload = {
                 from: parseInt(source),
                 to: user,
