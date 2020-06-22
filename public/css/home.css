@@ -41,7 +41,7 @@
 }
 
 #requests_list {
-    display:inline-block;
+    display: none;
     right: 0px;
     font-family: "Montserrat";
 
@@ -82,6 +82,21 @@ tr:nth-child(odd){background-color: blue}
     margin-top: 30px;
     font-size: 30px;
     color: orangered;
+}
+
+.delete_btn{
+    border: none
+}
+
+.delete_btn:hover{
+    cursor: pointer;
+}
+
+#ifcontent{
+    display: none;
+    margin-bottom: 20px;
+    font-family: "Montserrat";
+    font-size: 12px
 }
 
 /* #submit{

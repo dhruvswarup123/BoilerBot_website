@@ -341,7 +341,7 @@ app.get("/update_queue_deets", redirectLogin, (req, res) => {
 
 app.post("/remove_from_queue", redirectLogin, (req, res) => {
     const { id } = req.body
-    // console.log(id);      // your JSON
+    console.log(id);      // your JSON
 
     queue_db.deleteOne({_id:ObjectID(id)}, (res_) => {
         return res.redirect("/home?add_queue_err=" + encodeURIComponent("Removed Successfully!"))

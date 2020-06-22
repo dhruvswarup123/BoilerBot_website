@@ -21,7 +21,10 @@ div#info
 
     //- Show the queue table/list ++ have a remove button
     div#requests_text your requests
-
+    div#err
+        if err
+            = err
+    div#ifcontent queue empty
     table#requests_list
         tr 
             th position
@@ -29,13 +32,10 @@ div#info
             th email
             th purpose
             th status
+            th 
 
     //- Add more options here if needed
     div#new_request new request
-        div#err
-            if err
-                = err
-
         form(method='POST' action='/add_queue')
             input.input(type="hidden" name="source" value = user.id)
             input.input#new_email(type="email" name="destination" placeholder="destination email" required)
@@ -48,6 +48,5 @@ div#info
 
 div#orangeRect
     div#page_info homepage
-
 
 script(src="/js/home.js")
