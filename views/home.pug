@@ -36,14 +36,12 @@ div#info
 
     //- Add more options here if needed
     div#new_request new request
-        form(method='POST' action='/add_queue')
+        form(method='POST' action='/add_queue' autocomplete="off")
             input.input(type="hidden" name="source" value = user.id)
-            input.input#new_email(type="email" name="destination" placeholder="destination email" required)
-            br
-            input.input#new_email(type="text" name="purpose" placeholder="purpose" required)
-            br
+            input.input#destination(type="email" name="destination" placeholder="destination email" required)
+            div#user_suggestions
+            input.input#purpose(type="text" name="purpose" placeholder="purpose" required)
             button.button#submit(type='submit') Submit
-            br
                 
 
 div#orangeRect

@@ -61,7 +61,41 @@ function updatePage(){
     });
 }
 
+function create_user_table(){
+    let table = document.createElement("table")
+    table.id = "sug_table"
+    for (i in users){
+        let row = document.createElement("tr")
+        row.className = "sug_row"
+        row.innerHTML = `<td class="sug_name">${users[i].name}</td><td class="sug_email">${users[i].email}</td>`
+        table.appendChild(row)
+    }
+    return table
+}
+
+var users = null
 document.addEventListener("DOMContentLoaded", function(e) {
     updatePage()
+
+    fetch('/get_users')
+    .then(response => response.json())
+    .then(data => {
+        users = data
+        user_suggestions = document.getElementById("user_suggestions")
+        user_suggestions.appendChild(create_user_table())
+
+        var rows = document.getElementsByClassName("sug_row");
+        console.log(rows)
+        for (var i = 0; i < rows.length; i++) {
+            console.log(rows[i])
+            rows[i].addEventListener('click', select.bind(event, rows[i]));
+        }
+    })
 })
+
+function select(elem, event){
+    let email = elem.childNodes[1].innerHTML
+    document.getElementById("destination").value = email
+}
+
 

@@ -74,8 +74,8 @@ td{
     font-size: 13px;
 }
   
-tr:nth-child(even){background-color: red}
-tr:nth-child(odd){background-color: blue}
+/* tr:nth-child(even){background-color: red}
+tr:nth-child(odd){background-color: blue} */
 
 #new_request{
     font-family: "Viga";
@@ -107,6 +107,77 @@ tr:nth-child(odd){background-color: blue}
     width: 150px;
 } */
 
-/* #new_email{
-    margin-right: 10px;
-} */
+#user_suggestions{
+    margin: 0px;
+    padding: 0px;
+    margin-left: auto;
+    right: 0px;
+    width: 400px;
+    height: auto;
+    max-height: 0px;
+    border-right: 2px solid orangered;
+    overflow-y: auto;
+    transition-duration: 0.3s;
+    font-size: 12px;
+    margin-bottom: 20px;
+    margin-top: -20px;
+}
+
+#destination:focus + #user_suggestions{
+    max-height: 200px;
+}
+
+
+#user_suggestions:hover{
+    max-height: 200px;
+}
+
+.input{
+    margin-bottom: 20px;
+}
+
+#submit{
+    margin-top: 0px;
+    display: block;
+    right: 0px;
+    margin-left: auto;
+}
+
+#sug_table{
+    right: 0px;
+    font-family: "Montserrat";
+
+    border-collapse: collapse;
+    border-spacing: 0px;
+
+    max-height: 250px;
+    overflow-y: auto; 
+    width: 100%;
+    margin-right: 0px;
+    margin-left: auto;
+}
+
+#sug_table th, td {
+    text-align: center;
+    padding: 8px;
+    border: 1px solid white;
+}
+
+.sug_name{
+    text-align: right;
+    border-right-color: orangered;
+}
+
+.sug_email{
+    text-align: left;
+}
+
+.sug_row:hover .sug_name{
+    background-color: #ff450050;
+    cursor: pointer;
+}
+
+.sug_row:hover .sug_email{
+    background-color: #ff450050;
+    cursor: pointer;
+}
