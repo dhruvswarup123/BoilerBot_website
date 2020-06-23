@@ -353,10 +353,11 @@ app.get("/get_users", redirectLogin, (req, res) => {
     db.find({}, (err, obs) => {
         obs.toArray((err, docs) => {
             docs.sort((a, b) => a.name.localeCompare(b.name))
-
             out = []
             for (i in docs){
-                out.push({name: docs[i].name, email: docs[i].email})
+                if (docs[i].id != req.session.userID){
+                    out.push({name: docs[i].name, email: docs[i].email})
+                }
             }
 
             res.send(out)

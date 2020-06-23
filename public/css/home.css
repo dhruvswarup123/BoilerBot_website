@@ -67,7 +67,8 @@
 th, td {
     text-align: center;
     padding: 8px;
-    border: 1px solid #e4e4e4;
+    border: 1px solid #FFFFFF;
+    overflow-x: hidden;
 }
 
 td{
@@ -128,9 +129,9 @@ tr:nth-child(odd){background-color: blue} */
 }
 
 
-#user_suggestions:hover{
+/* #user_suggestions:hover{
     max-height: 200px;
-}
+} */
 
 .input{
     margin-bottom: 20px;
