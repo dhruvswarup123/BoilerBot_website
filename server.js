@@ -10,17 +10,17 @@ const { MongoClient, ObjectID } = require('mongodb')
 var mongoDbQueue = require('mongodb-queue')
 const bodyparser = require("body-parser")
 //Set up mongodb
-const MONGO_URI = "mongodb://localhost:27017/"
+const MONGO_URI = "mongodb+srv://test:test@boilerbot-db.sura6.gcp.mongodb.net/boilerbot_web?retryWrites=true&w=majority"//"mongodb://localhost:27017/"
+
 const client = new MongoClient(MONGO_URI, 
 { 
     useNewUrlParser: true, 
     useUnifiedTopology: true 
 })
 
-
 // For env variables 
 const { 
-    PORT = 3000, 
+    PORT = 8080, 
     NODE_ENV = "development", 
     SESS_NAME='sid' 
 } = process.env 
@@ -36,7 +36,7 @@ app.use(
   // Creates a session middleware with given options.
     session({
         store: new MongoStore({
-            url: "mongodb://localhost:27017/boilerbot_web",
+            url: "mongodb+srv://test:test@boilerbot-db.sura6.gcp.mongodb.net/boilerbot_web?retryWrites=true&w=majority",
             collection: "sessions_test"
         }),
 
@@ -105,7 +105,7 @@ app.use(
 
             // Secure attribute in Set-Cookie header. Whether the cookie can ONLY be
             // sent over HTTPS. Can be set to true, false, or 'auto'. Default is false.
-            secure: process.env.NODE_ENV === "production",
+            // secure: process.env.NODE_ENV === "production", // ERROR WITH COOKIE SAVING
         },
   })
 )
@@ -128,6 +128,7 @@ const redirectHome = (req, res, next) => {
         next()
     }
 }
+
 app.set('views','./views');
 // * To get the main page
 app.get("/", (req, res) => {
@@ -185,7 +186,6 @@ app.get("/login", redirectHome, (req, res) => {
     res.render("login", {err:req.query.err})
 })
 
-// db.insertOne({id: 3, name: 'lee', email: 'lee@gmail.com', password: 'passl'})
 
 // * Corresponing post route for login
 app.post("/login", redirectHome, (req, res) => {
@@ -371,12 +371,13 @@ var queue = null;
 var queue_db = null;
 
 client.connect().then( err => {
-    console.log("Connected to MongoDB users server!")
-    
     // The database
     db = client.db("boilerbot_web").collection("users")
     queue = mongoDbQueue(client.db("boilerbot_web"), 'queue')
     queue_db = client.db("boilerbot_web").collection("queue")
+
+    console.log("Connected to MongoDB users server!")
+    
     // db.find().toArray(function(err, docs) {
     //     for (i in docs){
     //         console.log(docs[i].name)
