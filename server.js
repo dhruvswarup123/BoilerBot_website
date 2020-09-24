@@ -10,7 +10,7 @@ const { MongoClient, ObjectID } = require('mongodb')
 var mongoDbQueue = require('mongodb-queue')
 const bodyparser = require("body-parser")
 //Set up mongodb
-const MONGO_URI = "mongodb+srv://test:test@boilerbot-db.sura6.gcp.mongodb.net/boilerbot_web?retryWrites=true&w=majority"//"mongodb://localhost:27017/"
+const MONGO_URI = "mongodb+srv://test:test@boilerbot-db.sura6.gcp.mongodb.net/boilerbot_web?retryWrites=true&w=majority"
 
 const client = new MongoClient(MONGO_URI, 
 { 
@@ -364,6 +364,35 @@ app.get("/get_users", redirectLogin, (req, res) => {
         })
     })
 })
+
+// ------------------------ BOILER BOT ADMIN USAGE-------------------------------------
+function _random(min, max) {
+    return Math.round(Math.random() * (max - min) + min);
+}
+
+function _make_2_digit(num) {
+    if (num.length < 2){
+        num = '0' + num;
+    }
+    return num;
+}
+
+app.get("/admin/get_from_queue", (req, res) => {
+    queue_db.find({}, (err, obs) => {
+        obs.toArray((err, docs) => {
+            let coord_x1 = _random(0, 9).toString();
+            let coord_y1 = _random(0, 9).toString();
+
+            let coord_x2 = _random(0, 9).toString();
+            let coord_y2 = _random(0, 9).toString();
+            
+            tosend = _make_2_digit(coord_x1) + ':' + _make_2_digit(coord_y1) + ':' + _make_2_digit(coord_x2) + ':' + _make_2_digit(coord_y2) + ':';
+            res.send(tosend); 
+        })
+    })
+})
+
+// ------------------------------------------------------------------------------------
 
 // client.db.collection object for mongodb. Will be updated after this for all functions to use
 var db = null;
