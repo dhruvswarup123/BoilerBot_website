@@ -37,7 +37,7 @@ div#info
     //- Add more options here if needed
     div#new_request new request
         form(method='POST' action='/add_queue' autocomplete="off")
-            input.input(type="hidden" name="source" value = user.id)
+            input.input(type="hidden" name="_source" value=user)
             input.input#destination(type="email" name="destination" placeholder="destination email" required)
             div#user_suggestions
             input.input#purpose(type="text" name="purpose" placeholder="purpose" required)

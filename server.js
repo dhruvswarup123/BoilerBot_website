@@ -241,12 +241,12 @@ const saltRounds = 10;
 
 // * Corresponing post route for register
 app.post("/register", redirectHome, (req, res) => {
-    const { name, email, password, confirm_password } = req.body
+    const { name, email, password, confirm_password, location, office_key } = req.body
 
     db.findOne({email: email}, (err, user) => {
         if (!user){
-            if (password.length < 5){
-                return res.redirect("/register?err=" + encodeURIComponent('password must be at least 5 characters')); 
+            if (office_key != '12345'){
+                return res.redirect("/register?err=" + encodeURIComponent('incorrect office key')); 
             }
             if (password != confirm_password){
                 return res.redirect("/register?err=" + encodeURIComponent('passwords do not match'));  
@@ -257,7 +257,8 @@ app.post("/register", redirectHome, (req, res) => {
                         id: rand,
                         name: name,
                         email: email,
-                        password: hash
+                        password: hash,
+                        location: {x:location.slice(0, 2), y:location.slice(3, 5)}
                     }
 
                     db.insertOne(user_);
@@ -299,17 +300,19 @@ app.post("/logout", redirectLogin, (req, res) => {
 })
 
 app.post("/add_queue", redirectLogin, (req, res) => {
-    const {source, destination, purpose} = req.body
+    const {_source, destination, purpose} = req.body;
+    const source = JSON.parse(_source);
+
     db.findOne({email: destination}, (err, user) => {
         if (!user){
             return res.redirect("/home?add_queue_err=" + encodeURIComponent("Destination not found"))
         }
-        if (user.id != parseInt(source)){
+        if (user.id != source.id){
             if (purpose.length > 25){
                 return res.redirect("/home?add_queue_err=" + encodeURIComponent("Purpose must be shorter than 25 chars"))
             }
             const payload = {
-                from: parseInt(source),
+                from: source,
                 to: user,
                 inserted_at: Date.now(),
                 purpose: purpose,
@@ -330,7 +333,7 @@ app.get("/update_queue_deets", redirectLogin, (req, res) => {
         obs.toArray((err, docs) => {
             out = []
             for (i in docs){
-                if (docs[i].payload.from == parseInt(req.session.userID)){
+                if (docs[i].payload.from.id == parseInt(req.session.userID)){
                     out.push({pos: i, document:docs[i]})
                 }
             }
@@ -341,8 +344,6 @@ app.get("/update_queue_deets", redirectLogin, (req, res) => {
 
 app.post("/remove_from_queue", redirectLogin, (req, res) => {
     const { id } = req.body
-    console.log(id);      // your JSON
-
     queue_db.deleteOne({_id:ObjectID(id)}, (res_) => {
         return res.redirect("/home?add_queue_err=" + encodeURIComponent("Removed Successfully!"))
     })
@@ -380,13 +381,7 @@ function _make_2_digit(num) {
 app.get("/admin/get_from_queue", (req, res) => {
     queue_db.find({}, (err, obs) => {
         obs.toArray((err, docs) => {
-            let coord_x1 = _random(0, 9).toString();
-            let coord_y1 = _random(0, 9).toString();
-
-            let coord_x2 = _random(0, 9).toString();
-            let coord_y2 = _random(0, 9).toString();
-            
-            tosend = _make_2_digit(coord_x1) + ':' + _make_2_digit(coord_y1) + ':' + _make_2_digit(coord_x2) + ':' + _make_2_digit(coord_y2) + ':';
+            tosend = docs[0].payload.from.location.x + ':' + docs[0].payload.from.location.y + ':' + docs[0].payload.to.location.x + ':' + docs[0].payload.to.location.y + ':';
             res.send(tosend); 
         })
     })

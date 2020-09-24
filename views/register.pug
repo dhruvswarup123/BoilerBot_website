@@ -18,10 +18,19 @@ div#info
         br
         input.input(type='email' placeholder='name@email.com' name='email' required)
         br
-        input.input(type='password' placeholder='password' name='password' required)
+        input.input(type='password' placeholder='password' name='password' 
+        pattern='.{5}.*' required
+        title="at least five characters")
         br
         input.input(type='password' placeholder='confirm password' name='confirm_password' required)         
         br
+        input.input(type='input' placeholder='location (xx/yy)' pattern='(0[0-9]|1[01])\/(0[0-9]|1[01])' name='location' required
+        title="please obtain from HR. limits x, y <= 11")         
+        br
+        input.input(type='input' placeholder='office key' pattern='[0-9a-zA-Z]{5}' name='office_key' required
+        title="please obtain from HR")         
+        br
+
         button.button#submit(type='submit') submit
 
     form(action='/login')
