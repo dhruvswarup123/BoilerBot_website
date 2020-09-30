@@ -347,7 +347,6 @@ app.post("/remove_from_queue", redirectLogin, (req, res) => {
     queue_db.deleteOne({_id:ObjectID(id)}, (res_) => {
         return res.redirect("/home?add_queue_err=" + encodeURIComponent("Removed Successfully!"))
     })
-    
 })
 
 app.get("/get_users", redirectLogin, (req, res) => {
@@ -366,6 +365,37 @@ app.get("/get_users", redirectLogin, (req, res) => {
     })
 })
 
+var unlock_bot = false; // Should the bot be unlocked?
+var currDelivery = null;
+
+// function updateCurrDelivery(){
+//     queue_db.find({}, (err, obs) => {
+//         obs.toArray((err, docs) => {
+//             currDelivery = docs[0];
+//         })
+//     })
+// }
+
+app.post("/unlock", redirectLogin, (req, res) => {
+    const { id } = req.body;
+
+    queue_db.find({}, (err, obs) => {
+        obs.toArray((err, docs) => {
+            currDelivery = docs[0];
+            if (currDelivery._id == id){
+                db.findOne({id: req.session.userID}, (err, user) => {
+                    console.log("setting unlock...")
+                    unlock_bot = true;
+                    return res.redirect("/home?add_queue_err=" + encodeURIComponent("unlocking..."))
+                })
+            }
+            else {
+                return res.redirect("/home?add_queue_err=" + encodeURIComponent("cannot unlock. wrong delivery selected..."))
+            }
+        })
+    })
+})
+
 // ------------------------ BOILER BOT ADMIN USAGE-------------------------------------
 function _random(min, max) {
     return Math.round(Math.random() * (max - min) + min);
@@ -378,6 +408,7 @@ function _make_2_digit(num) {
     return num;
 }
 
+
 app.get("/admin/get_from_queue", (req, res) => {
     queue_db.find({}, (err, obs) => {
         obs.toArray((err, docs) => {
@@ -386,6 +417,32 @@ app.get("/admin/get_from_queue", (req, res) => {
         })
     })
 })
+
+// After delivery ends, remove from queue
+// app.get("/admin/remove_from_queue", (req, res) => {
+    // queue_db.find({}, (err, obs) => {
+    //     obs.toArray((err, docs) => {
+    //         tosend = docs[0].payload.from.location.x + ':' + docs[0].payload.from.location.y + ':' + docs[0].payload.to.location.x + ':' + docs[0].payload.to.location.y + ':';
+    //         res.send(tosend); 
+    //     })
+    // })
+// })
+
+// Unlock portal- unlock the lock for 15s - check that unlock guy 
+app.get("/admin/check_unlock", (req, res) => {
+    let sendchar = 'n';
+
+    if (unlock_bot == true){
+        unlock_bot = false;
+        sendchar = 'y';
+    }
+
+    res.send(sendchar);
+})
+
+// 
+
+
 
 // ------------------------------------------------------------------------------------
 

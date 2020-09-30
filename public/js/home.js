@@ -10,6 +10,15 @@ function getDeleteForm(i){
     `
 }
 
+function getUnlockForm(i){
+    return `
+        <form action="/unlock" method="post">
+            <input type="hidden" name="id" value="${i}">
+            <button type="submit" class="delete_btn"> &#128275; </button>
+        </form>
+    `
+}
+
 // async function deleteItemFromQueue(i) {
 //    console.log(currList[i])
 //    fetch('/remove_from_queue', {
@@ -52,10 +61,9 @@ function updatePage(){
                 <td> ${data[i].document.payload.purpose} </td>
                 <td> n/a </td>
                 <td class="delete_cell"> ${getDeleteForm(data[i].document._id)} </td>
+                <td class="delete_cell"> ${getUnlockForm(data[i].document._id)} </td>
             `
-            // <td> <button class="delete_btn" onclick="deleteItemFromQueue(${i})"> &#10060; </button> </td>
-            // temp.innerHTML = `position: ${data[i].pos} ------ to: ${data[i].document.payload.to.email} ${getRemoveButton(data[i])}`
-            
+
             currList.push(data[i])
         }
     });
