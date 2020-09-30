@@ -54,17 +54,31 @@ function updatePage(){
         for (i in data){
             let date = new Date(data[i].document.payload.inserted_at*1000)
             let row = table.insertRow()
-            row.innerHTML = `
+
+            if (data[i].type == 'outgoing'){
+                row.innerHTML = `
                 <td> ${data[i].pos} </td>
                 <td> ${data[i].document.payload.to.name} </td>
                 <td> ${data[i].document.payload.to.email} </td>
                 <td> ${data[i].document.payload.purpose} </td>
-                <td> n/a </td>
+                <td> ${data[i].type} </td>
                 <td class="delete_cell"> ${getDeleteForm(data[i].document._id)} </td>
                 <td class="delete_cell"> ${getUnlockForm(data[i].document._id)} </td>
-            `
+                `
+            }
+            else {
+                row.innerHTML = `
+                <td> ${data[i].pos} </td>
+                <td> ${data[i].document.payload.from.name} </td>
+                <td> ${data[i].document.payload.from.email} </td>
+                <td> ${data[i].document.payload.purpose} </td>
+                <td> ${data[i].type} </td>
+                <td class="delete_cell"> ${getDeleteForm(data[i].document._id)} </td>
+                <td class="delete_cell"> ${getUnlockForm(data[i].document._id)} </td>
+                `
+            }
 
-            currList.push(data[i])
+            currList.push(data[i]);
         }
     });
 }

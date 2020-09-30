@@ -334,7 +334,10 @@ app.get("/update_queue_deets", redirectLogin, (req, res) => {
             out = []
             for (i in docs){
                 if (docs[i].payload.from.id == parseInt(req.session.userID)){
-                    out.push({pos: i, document:docs[i]})
+                    out.push({pos: i, document:docs[i], type:"outgoing"})
+                }
+                else if (docs[i].payload.to.id == parseInt(req.session.userID)){
+                    out.push({pos: i, document:docs[i], type:"incoming"})
                 }
             }
             res.send(out)
@@ -395,6 +398,35 @@ app.post("/unlock", redirectLogin, (req, res) => {
         })
     })
 })
+
+// 1. client polls server to hckec if it is the recipent of ongoing delivery
+// 2. the client js shows a notification for delivery, with options
+
+// app.post("/login", redirectHome, (req, res) => {
+//     const { email, password } = req.body
+//     let user = null;
+//     if (email && password){
+//         db.findOne({email: email}, (err, user) => {
+//             if (user){
+//                 bcrypt.compare(password, user.password, function(err, result) {
+//                     if (result == true){
+//                         req.session.userID = user.id
+//                         return res.redirect("/home")
+//                     }
+//                     else {
+//                         return res.redirect("/login?err=" + encodeURIComponent('incorrect username or password'));
+//                     }
+//                 });
+//             } else{
+//                 return res.redirect("/login?err=" + encodeURIComponent('incorrect username or password'));   
+//             }
+//         })
+//     }
+//     else {
+//         return res.redirect("/login?err=" + encodeURIComponent('fields were left blank'));
+//     }
+// })
+
 
 // ------------------------ BOILER BOT ADMIN USAGE-------------------------------------
 function _random(min, max) {
