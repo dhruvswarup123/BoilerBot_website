@@ -45,7 +45,7 @@
     color:black;
 }
 .input:focus::placeholder{
-    color: #80808050;
+    color: #00000075;
 }
 
 
@@ -54,8 +54,8 @@
     margin-top: 50px;
     font-family: "Montserrat";
     /* border: none; */
-    border-color: #80808050;
-    color: #80808050;
+    border-color: #00000075;
+    color: #00000075;
     /* bottom: 120px; */
     right: 0px;
 }

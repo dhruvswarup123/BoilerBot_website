@@ -5,7 +5,7 @@ function getDeleteForm(i){
     return `
         <form action="/remove_from_queue" method="post">
             <input type="hidden" name="id" value="${i}">
-            <button type="submit" class="delete_btn"> &#10060; </button>
+            <button type="submit" class="delete_btn" title="delete request"> &#10060; </button>
         </form>
     `
 }
@@ -14,7 +14,25 @@ function getUnlockForm(i){
     return `
         <form action="/unlock" method="post">
             <input type="hidden" name="id" value="${i}">
-            <button type="submit" class="delete_btn"> &#128275; </button>
+            <button type="submit" class="delete_btn" title="unlock the boilerbot"> &#128275; </button>
+        </form>
+    `
+}
+
+function getStartDeliveryForm(i){
+    return `
+        <form action="/start_delivery" method="post">
+            <input type="hidden" name="id" value="${i}">
+            <button type="submit" class="delete_btn" title="locked and loaded. click to start delivery"> &#9989 </button>
+        </form>
+    `
+}
+
+function getEndDeliveryForm(i){
+    return `
+        <form action="/end_delivery" method="post">
+            <input type="hidden" name="id" value="${i}">
+            <button type="submit" class="delete_btn" title="i got it! click to end delivery"> &#9989 </button>
         </form>
     `
 }
@@ -64,6 +82,7 @@ function updatePage(){
                 <td> ${data[i].type} </td>
                 <td class="delete_cell"> ${getDeleteForm(data[i].document._id)} </td>
                 <td class="delete_cell"> ${getUnlockForm(data[i].document._id)} </td>
+                <td class="delete_cell"> ${getStartDeliveryForm(data[i].document._id)} </td>
                 `
             }
             else {
@@ -73,8 +92,9 @@ function updatePage(){
                 <td> ${data[i].document.payload.from.email} </td>
                 <td> ${data[i].document.payload.purpose} </td>
                 <td> ${data[i].type} </td>
-                <td class="delete_cell"> ${getDeleteForm(data[i].document._id)} </td>
+                <td></td>
                 <td class="delete_cell"> ${getUnlockForm(data[i].document._id)} </td>
+                <td class="delete_cell"> ${getEndDeliveryForm(data[i].document._id)} </td>
                 `
             }
 

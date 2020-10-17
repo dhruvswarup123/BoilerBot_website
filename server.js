@@ -346,10 +346,23 @@ app.get("/update_queue_deets", redirectLogin, (req, res) => {
 })
 
 app.post("/remove_from_queue", redirectLogin, (req, res) => {
-    const { id } = req.body
-    queue_db.deleteOne({_id:ObjectID(id)}, (res_) => {
-        return res.redirect("/home?add_queue_err=" + encodeURIComponent("Removed Successfully!"))
-    })
+    const { id } = req.body;
+    if ((currDelivery._id == id) && delivery_in_progress){
+        return res.redirect("/home?add_queue_err=" + encodeURIComponent("cannot delete. delivery in progress..."));
+    }
+    else {
+        db.findOne({id: req.session.userID}, (err, user) => { // why are we doing this???
+            if (req.session.userID == currDelivery.payload.from.id){
+                console.log("deleting...")
+                queue_db.deleteOne({_id:ObjectID(id)}, (res_) => {
+                    return res.redirect("/home?add_queue_err=" + encodeURIComponent("Removed Successfully!"))
+                })
+            }
+            else {
+                return res.redirect("/home?add_queue_err=" + encodeURIComponent("cannot delete. unauthorized..."))
+            }
+        })
+    }    
 })
 
 app.get("/get_users", redirectLogin, (req, res) => {
@@ -371,13 +384,13 @@ app.get("/get_users", redirectLogin, (req, res) => {
 var unlock_bot = false; // Should the bot be unlocked?
 var currDelivery = null;
 
-// function updateCurrDelivery(){
-//     queue_db.find({}, (err, obs) => {
-//         obs.toArray((err, docs) => {
-//             currDelivery = docs[0];
-//         })
-//     })
-// }
+function updateCurrDelivery(){
+    queue_db.find({}, (err, obs) => {
+        obs.toArray((err, docs) => {
+            currDelivery = docs[0];
+        })
+    })
+}
 
 app.post("/unlock", redirectLogin, (req, res) => {
     const { id } = req.body;
@@ -386,14 +399,98 @@ app.post("/unlock", redirectLogin, (req, res) => {
         obs.toArray((err, docs) => {
             currDelivery = docs[0];
             if (currDelivery._id == id){
-                db.findOne({id: req.session.userID}, (err, user) => {
-                    console.log("setting unlock...")
-                    unlock_bot = true;
-                    return res.redirect("/home?add_queue_err=" + encodeURIComponent("unlocking..."))
+                db.findOne({id: req.session.userID}, (err, user) => { // why are we doing this???
+                    if ((req.session.userID == currDelivery.payload.from.id)){
+                        if (!delivery_in_progress) {    
+                            console.log("setting unlock...")
+                            unlock_bot = true;
+                            return res.redirect("/home?add_queue_err=" + encodeURIComponent("unlocking..."))
+                        }
+                        else {
+                            return res.redirect("/home?add_queue_err=" + encodeURIComponent("cannot unlock. delivery already in progress..."))
+                        }
+                    }
+                    else { // ur the reciever
+                        if (delivery_in_progress && reached_destination) {    
+                            console.log("setting unlock...")
+                            unlock_bot = true;
+                            return res.redirect("/home?add_queue_err=" + encodeURIComponent("unlocking..."))
+                        }
+                        else {
+                            return res.redirect("/home?add_queue_err=" + encodeURIComponent("cannot unlock. delivery still in progress..."))
+                        }
+                    }
                 })
             }
             else {
                 return res.redirect("/home?add_queue_err=" + encodeURIComponent("cannot unlock. wrong delivery selected..."))
+            }
+        })
+    })
+})
+
+// When set, the bot will start delivery, and turn it off at the end
+var delivery_in_progress = false;
+var reached_destination = false; // set when reached dest
+
+app.post("/start_delivery", redirectLogin, (req, res) => {
+    const { id } = req.body;
+    
+    queue_db.find({}, (err, obs) => {
+        obs.toArray((err, docs) => {
+            currDelivery = docs[0]; // get current delivery
+            if (currDelivery._id == id){ // if current delivery is the one that user requested, then ... 
+                db.findOne({id: req.session.userID}, (err, user) => {
+                    if (currDelivery.payload.from.id == req.session.userID){
+                        if (!delivery_in_progress) {
+                            console.log("starting delivery...")
+                            delivery_in_progress = true;
+                            reached_destination = false;
+                            return res.redirect("/home?add_queue_err=" + encodeURIComponent("starting delivery..."))
+                        }
+                        else {
+                            return res.redirect("/home?add_queue_err=" + encodeURIComponent("delivery already in progress..."))
+                        }
+                    }
+                    else {
+                        return res.redirect("/home?add_queue_err=" + encodeURIComponent("you do not own this delivery..."))
+                    }
+                })
+            }
+            else {
+                return res.redirect("/home?add_queue_err=" + encodeURIComponent("cannot start delivery. wrong delivery selected..."))
+            }
+        })
+    })
+})
+
+app.post("/end_delivery", redirectLogin, (req, res) => {
+    const { id } = req.body;
+
+    queue_db.find({}, (err, obs) => {
+        obs.toArray((err, docs) => {
+            currDelivery = docs[0]; // get current delivery
+            if (currDelivery._id == id){ // if current delivery is the one that user requested, then ... 
+                db.findOne({id: req.session.userID}, (err, user) => {
+                    if (currDelivery.payload.to.id == req.session.userID){
+                        if (delivery_in_progress && reached_destination) {
+                            console.log("ending delivery...")
+                            delivery_in_progress = false;
+                            queue_db.deleteOne({_id:ObjectID(id)}, (res_) => {
+                                return res.redirect("/home?add_queue_err=" + encodeURIComponent("ended Successfully!"))
+                            })
+                        }
+                        else {
+                            return res.redirect("/home?add_queue_err=" + encodeURIComponent("delivery still in progress..."))
+                        }
+                    }
+                    else {
+                        return res.redirect("/home?add_queue_err=" + encodeURIComponent("you do not own this delivery..."))
+                    }
+                })
+            }
+            else {
+                return res.redirect("/home?add_queue_err=" + encodeURIComponent("cannot end delivery. wrong delivery selected..."))
             }
         })
     })
@@ -472,6 +569,12 @@ app.get("/admin/check_unlock", (req, res) => {
     res.send(sendchar);
 })
 
+// use when reached dest
+app.get("/admin/set_reached_destination", (req, res) => {
+    reached_destination = true;
+    res.sendStatus(200);
+})
+
 // 
 
 
@@ -496,7 +599,7 @@ client.connect().then( err => {
     //         console.log(docs[i].name)
     //     }
     // });
-
+    updateCurrDelivery();
     app.listen(PORT, () =>
         console.log(`Starting server on http://localhost:${PORT}...`)
     )
