@@ -347,22 +347,22 @@ app.get("/update_queue_deets", redirectLogin, (req, res) => {
 
 app.post("/remove_from_queue", redirectLogin, (req, res) => {
     const { id } = req.body;
-    if ((currDelivery._id == id) && delivery_in_progress){
-        return res.redirect("/home?add_queue_err=" + encodeURIComponent("cannot delete. delivery in progress..."));
-    }
-    else {
-        db.findOne({id: req.session.userID}, (err, user) => { // why are we doing this???
-            if (req.session.userID == currDelivery.payload.from.id){
-                console.log("deleting...")
-                queue_db.deleteOne({_id:ObjectID(id)}, (res_) => {
-                    return res.redirect("/home?add_queue_err=" + encodeURIComponent("Removed Successfully!"))
-                })
+    queue_db.find({}, (err, obs) => {
+        obs.toArray((err, docs) => {
+            currDelivery = docs[0];
+            if (currDelivery._id == id){
+                return res.redirect("/home?add_queue_err=" + encodeURIComponent("cannot delete. this is current delivery..."));
             }
             else {
-                return res.redirect("/home?add_queue_err=" + encodeURIComponent("cannot delete. unauthorized..."))
-            }
-        })
-    }    
+                db.findOne({id: req.session.userID}, (err, user) => { // why are we doing this???
+                    console.log("deleting...")
+                    queue_db.deleteOne({_id:ObjectID(id)}, (res_) => {
+                        return res.redirect("/home?add_queue_err=" + encodeURIComponent("Removed Successfully!"))
+                    })
+                })
+            }  
+        })    
+    })
 })
 
 app.get("/get_users", redirectLogin, (req, res) => {
@@ -387,7 +387,9 @@ var currDelivery = null;
 function updateCurrDelivery(){
     queue_db.find({}, (err, obs) => {
         obs.toArray((err, docs) => {
-            currDelivery = docs[0];
+            if (docs.length > 0) {
+                currDelivery = docs[0];
+            }
         })
     })
 }
@@ -541,21 +543,16 @@ function _make_2_digit(num) {
 app.get("/admin/get_from_queue", (req, res) => {
     queue_db.find({}, (err, obs) => {
         obs.toArray((err, docs) => {
-            tosend = docs[0].payload.from.location.x + ':' + docs[0].payload.from.location.y + ':' + docs[0].payload.to.location.x + ':' + docs[0].payload.to.location.y + ':';
-            res.send(tosend); 
+            if (docs.length == 0){
+                res.send("na");
+            }
+            else {
+                tosend = docs[0].payload.from.location.x + ':' + docs[0].payload.from.location.y + ':' + docs[0].payload.to.location.x + ':' + docs[0].payload.to.location.y + ':';
+                res.send(tosend); 
+            }
         })
     })
 })
-
-// After delivery ends, remove from queue
-// app.get("/admin/remove_from_queue", (req, res) => {
-    // queue_db.find({}, (err, obs) => {
-    //     obs.toArray((err, docs) => {
-    //         tosend = docs[0].payload.from.location.x + ':' + docs[0].payload.from.location.y + ':' + docs[0].payload.to.location.x + ':' + docs[0].payload.to.location.y + ':';
-    //         res.send(tosend); 
-    //     })
-    // })
-// })
 
 // Unlock portal- unlock the lock for 15s - check that unlock guy 
 app.get("/admin/check_unlock", (req, res) => {
@@ -575,9 +572,32 @@ app.get("/admin/set_reached_destination", (req, res) => {
     res.sendStatus(200);
 })
 
-// 
+// Has the delivery been started?
+app.get("/admin/has_delivery_started", (req, res) => {
+    if (delivery_in_progress){
+        res.send("yes");
+    }
+    else {
+        res.send("no");
+    }
+})
+
+app.get("/admin/has_delivery_ended", (req, res) => {
+    if (!delivery_in_progress){
+        res.send("yes");
+    }
+    else {
+        res.send("no");
+    }
+})
 
 
+
+// ------------------------------------------------------------------------------------
+
+app.get("/visualize", (req, res) => {
+    res.render("visualizer");
+})
 
 // ------------------------------------------------------------------------------------
 
@@ -600,6 +620,7 @@ client.connect().then( err => {
     //     }
     // });
     updateCurrDelivery();
+    
     app.listen(PORT, () =>
         console.log(`Starting server on http://localhost:${PORT}...`)
     )
