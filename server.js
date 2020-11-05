@@ -9,6 +9,8 @@ const MongoStore      = require('connect-mongo')(session)
 const { MongoClient, ObjectID } = require('mongodb')
 var mongoDbQueue = require('mongodb-queue')
 const bodyparser = require("body-parser")
+// var favicon = require('serve-favicon');
+
 //Set up mongodb
 const MONGO_URI = "mongodb+srv://test:test@boilerbot-db.sura6.gcp.mongodb.net/boilerbot_web?retryWrites=true&w=majority"
 
@@ -31,6 +33,7 @@ app.use(express.static("public"));
 app.use(express.json()) //Used to parse JSON bodies
 app.use(express.urlencoded({ extended: true }))
 app.use(bodyparser.json());
+// app.use(favicon(path.join(__dirname, 'public', 'resources', 'favicon.ico')))
 
 app.use(
   // Creates a session middleware with given options.
@@ -258,7 +261,7 @@ app.post("/register", redirectHome, (req, res) => {
                         name: name,
                         email: email,
                         password: hash,
-                        location: {x:location.slice(0, 2), y:location.slice(3, 5)}
+                        location: {x:location.slice(0, 1), y:location.slice(2, 3)}
                     }
 
                     db.insertOne(user_);
@@ -591,7 +594,12 @@ app.get("/admin/has_delivery_ended", (req, res) => {
     }
 })
 
-
+// let printContent = '';
+app.get("/admin/print", (req, res) => {
+    let out = req.query.text;
+    console.log(out);
+    res.send();
+})
 
 // ------------------------------------------------------------------------------------
 

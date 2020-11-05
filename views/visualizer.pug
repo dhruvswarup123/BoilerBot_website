@@ -1,4 +1,6 @@
 doctype html
+title BoilerBot. LiDAR.
+
 head
     meta(name="viewport" width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0)
     style(body {padding: 0; margin: 0;})
@@ -10,6 +12,8 @@ head
     link(rel="stylesheet" type="text/css" href="/css/login.css") 
     link(rel="stylesheet" type="text/css" href="/css/home.css") 
     link(rel="stylesheet" type="text/css" href="/css/visualizer.css") 
+    link(rel="shortcut icon" href="/resources/favicon.ico")
+
 body
     input.input#visualizer(type="text" name="lidar_data" placeholder="x, y" onkeydown="process()")
     button.button#visualizer_btn process

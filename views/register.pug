@@ -1,9 +1,13 @@
 doctype html
+title BoilerBot. Register.
+
 head
     link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Viga")
     link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat")
     link(rel="stylesheet" type="text/css" href="/css/root.css") 
     link(rel="stylesheet" type="text/css" href="/css/login.css") 
+    link(rel="shortcut icon" href="/resources/favicon.ico")
+
 
 
 div#info
@@ -24,8 +28,8 @@ div#info
         br
         input.input(type='password' placeholder='confirm password' name='confirm_password' required)         
         br
-        input.input(type='input' placeholder='location (xx/yy)' pattern='(0[0-9]|1[01])\/(0[0-9]|1[01])' name='location' required
-        title="please obtain from HR. limits x, y <= 11")         
+        input.input(type='input' placeholder='location (x,y)' pattern='[0-6],[0-6]' name='location' required
+        title="please obtain from HR. limits x,y <= 6")         
         br
         input.input(type='input' placeholder='office key' pattern='[0-9a-zA-Z]{5}' name='office_key' required
         title="please obtain from HR")         
